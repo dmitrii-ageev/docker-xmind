@@ -13,7 +13,7 @@ ENV HOME /home/$UNAME
 # Set locale
 ENV LANG en_US.UTF-8
 
-# Set non-interactive interface for apt
+# Set non-interactive interface for apt-get
 ENV DEBIAN_FRONTEND noninteractive
 
 # Create a user
@@ -21,12 +21,12 @@ RUN groupadd -g 1000 $UNAME
 RUN useradd -u 1000 -g 1000 -G audio -m $UNAME
 
 # Update cache and install system tools
-RUN apt update
-RUN apt install -y curl
+RUN apt-get update
+RUN apt-get install -y curl
 
 # Download and install XMind
 RUN curl -L -o $HOME/$FILE $LINK 
-RUN apt install -y $HOME/$FILE
+RUN apt-get install -fy "$HOME/$FILE"
 RUN rm -f $HOME/$FILE
 
 # Switch to the user account
