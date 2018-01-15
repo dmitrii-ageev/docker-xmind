@@ -32,4 +32,4 @@ RUN rm -f $FILE
 USER $UNAME
 
 # Start Xmind
-CMD /usr/bin/XMind
+CMD SWT_GTK3=0 /usr/bin/XMind
