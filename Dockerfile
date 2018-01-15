@@ -1,14 +1,13 @@
-FROM ubuntu:14.04
+FROM ubuntu:xenial
 LABEL maintainer "Dmitrii Ageev <d.ageev@gmail.com>"
-
-# Set package variables
-ENV FILE xmind-8-beta-linux_amd64.deb
-ENV LINK "https://www.xmind.net/xmind/downloads/$FILE"
-
 
 # Set a user account details
 ENV UNAME developer
 ENV HOME /home/$UNAME
+
+# Set package variables
+ENV FILE "xmind-8-beta-linux_amd64.deb"
+ENV LINK "https://www.xmind.net/xmind/downloads/$FILE"
 
 # Set locale
 ENV LANG en_US.UTF-8
@@ -21,13 +20,13 @@ RUN groupadd -g 1000 $UNAME
 RUN useradd -u 1000 -g 1000 -G audio -m $UNAME
 
 # Update cache and install system tools
-RUN apt-get update
-RUN apt-get install -y curl
+RUN apt update
+RUN apt install -y curl
 
 # Download and install XMind
-RUN curl -L -o $HOME/$FILE $LINK 
-RUN apt-get install -fy "$HOME/$FILE"
-RUN rm -f $HOME/$FILE
+RUN curl -L -o $FILE $LINK 
+RUN apt install -y ./$FILE
+RUN rm -f $FILE
 
 # Switch to the user account
 USER $UNAME
