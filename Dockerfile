@@ -30,6 +30,7 @@ RUN rm -f $FILE
 
 # Switch to the user account
 USER $UNAME
+RUN echo "export SWT_GTK3=0" > $HOME/.profile
 
 # Start Xmind
-CMD SWT_GTK3=0 /usr/bin/XMind
+CMD /usr/bin/XMind
