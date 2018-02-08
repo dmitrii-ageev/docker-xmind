@@ -2,7 +2,7 @@ FROM ubuntu:xenial
 MAINTAINER Dmitrii Ageev <d.ageev@gmail.com>
 
 # Set environment
-ENV APPLICATION "telegram"
+ENV APPLICATION "xmind"
 ENV FILE "xmind-8-beta-linux_amd64.deb"
 ENV LINK "https://www.xmind.net/xmind/downloads/$FILE"
 ENV EXECUTABLE "/usr/bin/XMind"
