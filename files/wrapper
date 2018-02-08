@@ -1,0 +1,82 @@
+#!/bin/bash
+APPLICATION=$(basename $0)
+APP_USER=${APPLICATION}
+PATH=/usr/sbin:/usr/bin:/sbin:/bin
+
+# do we need to use sudo to start docker containers?
+( id -Gn | grep -q docker ) || SUDO=sudo
+
+USER_UID=$(id -u)
+USER_GID=$(id -g)
+
+XSOCK=/tmp/.X11-unix
+XAUTH=/tmp/.docker.xauth
+
+DOWNLOAD_DIR=$(xdg-user-dir DOWNLOAD)
+if [ -z "${DOWNLOAD_DIR}" ]; then
+    DOWNLOAD_DIR="${HOME}/Downloads"
+fi;
+
+list_commands() {
+  echo ""
+  echo "Launch ${APPLICATION} using:"
+  echo "  ${APPLICATION} command"
+  echo ""
+  exit 1
+}
+
+prepare_docker_env_parameters() {
+  ENV_VARS+=" --env=USER_UID=${USER_UID}"
+  ENV_VARS+=" --env=USER_GID=${USER_GID}"
+  ENV_VARS+=" --env=DISPLAY"
+  ENV_VARS+=" --env=XAUTHORITY=${XAUTH}"
+  ENV_VARS+=" --env=TZ=$(date +%Z)"
+}
+
+prepare_docker_volume_parameters() {
+  touch ${XAUTH}
+  xauth nlist :0 | sed -e 's/^..../ffff/' | xauth -f ${XAUTH} nmerge -
+
+  VOLUMES+=" --volume=${DOWNLOAD_DIR}:/home/${APP_USER}/Downloads"
+  VOLUMES+=" --volume=${HOME}/.${APPLICATION}:/home/${APP_USER}/.${APPLICATION}"
+  for FOLDER in cache local config pki; do
+    VOLUMES+=" --volume=${HOME}/.${APPLICATION}/.${FOLDER}:/home/${APP_USER}/.${FOLDER}"
+  done
+  VOLUMES+=" --volume=${XSOCK}:${XSOCK}"
+  VOLUMES+=" --volume=${XAUTH}:${XAUTH}"
+  VOLUMES+=" --volume=/run/user/${USER_UID}/pulse:/run/pulse"
+}
+
+prepare_docker_device_parameters() {
+  # Enumerate video devices
+  VIDEO_DEVICES=
+  for device in /dev/video* /dev/dri/*
+  do
+    if [ -c $device ]; then
+      VIDEO_DEVICES="${VIDEO_DEVICES} --device $device:$device"
+    fi
+  done
+}
+
+case $1 in
+  --help|help)
+    list_commands
+    exit 1
+    ;;
+  *)
+    ;;
+esac
+
+prepare_docker_env_parameters
+prepare_docker_volume_parameters
+prepare_docker_device_parameters
+
+echo "Starting ${APPLICATION}..."
+${SUDO} docker run -d --rm \
+  --name ${APPLICATION} -h docker \
+  --cpuset-cpus 0 --memory 2048mb --net host \
+  ${ENV_VARS} \
+  ${VIDEO_DEVICES} \
+  ${VOLUMES} \
+  dmitriiageev/${APPLICATION} >/dev/null
+
