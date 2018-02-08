@@ -1,9 +1,3 @@
-
-# Start Xmind
-CMD 
-
-
-
 FROM ubuntu:xenial
 MAINTAINER Dmitrii Ageev <d.ageev@gmail.com>
 
