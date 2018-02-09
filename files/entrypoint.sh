@@ -8,6 +8,7 @@ APP_USER=$(echo $APPLICATION|head -c 8)
 install_application() {
   echo "Installing ${APPLICATION}..."
   install -m 0755 /sbin/wrapper /target/${APPLICATION}
+  chown ${USER_UID}:${USER_GID} /target/${APPLICATION}
 }
 
 uninstall_application() {
